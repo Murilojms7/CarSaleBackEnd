@@ -13,14 +13,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain config(HttpSecurity http) throws Exception{
+    public SecurityFilterChain config(HttpSecurity http, AuthorizationFilter authorizationFilter) throws Exception{
         http
             .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(HttpMethod.POST, "/comments").authenticated()
+                    .requestMatchers(HttpMethod.GET,"/comments").permitAll()
+                    .requestMatchers(HttpMethod.DELETE, "/comments/{id}").hasRole("ADMIN")
                     .anyRequest().permitAll()
             )
             .csrf(csrf -> csrf.disable()
-        );
 
+        );
+        http.addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
 
     }
